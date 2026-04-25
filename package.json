@@ -1,5 +1,5 @@
 {
-  "name": "ppwr-projet",
+  "name": "ppwr",
   "version": "0.1.0",
   "private": true,
   "description": "PPWR projet",
@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Shahingharbi/ppwr-projet.git"
+    "url": "https://github.com/Shahingharbi/ppwr.git"
   },
-  "homepage": "https://github.com/Shahingharbi/ppwr-projet",
+  "homepage": "https://github.com/Shahingharbi/ppwr",
   "bugs": {
-    "url": "https://github.com/Shahingharbi/ppwr-projet/issues"
+    "url": "https://github.com/Shahingharbi/ppwr/issues"
   },
   "keywords": [
     "claude-code",
