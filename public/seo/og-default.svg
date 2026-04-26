@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Pactum — The PPWR Advisory">
+  <rect width="1200" height="630" fill="#0f1a16"/>
+  <g font-family="Helvetica, Arial, sans-serif" fill="#ffffff" text-anchor="middle">
+    <text x="600" y="300" font-size="148" font-weight="700" letter-spacing="-4">Pactum</text>
+    <text x="600" y="370" font-size="36" font-weight="400" fill="#d1fae5" letter-spacing="2">The PPWR Advisory</text>
+    <text x="600" y="430" font-size="22" font-weight="400" fill="#10b981" letter-spacing="4">REGULATION (EU) 2025/40 — COMPLIANCE BY DESIGN</text>
+  </g>
+  <g transform="translate(48 48)">
+    <rect x="0" y="0" rx="22" ry="22" width="320" height="44" fill="#10b981"/>
+    <text x="160" y="29" font-family="Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0f1a16" text-anchor="middle" letter-spacing="2">REGULATION (EU) 2025/40</text>
+  </g>
+  <g transform="translate(48 538)" font-family="Helvetica, Arial, sans-serif" fill="#d1fae5">
+    <text x="0" y="0" font-size="20" font-weight="400">pactum-advisory.eu</text>
+    <text x="0" y="32" font-size="16" font-weight="400" fill="#ffffff" opacity="0.6">Recyclability · Recycled content · Reuse · PFAS · DoC</text>
+  </g>
+  <g transform="translate(1152 96)" fill="#10b981">
+    <circle cx="0" cy="0" r="8"/>
+  </g>
+</svg>

@@ -1,0 +1,118 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
+const OBLIGATIONS = [
+  {
+    article: "Art. 5",
+    headline: "PFAS in food-contact packaging",
+    summary:
+      "Intentionally added PFAS banned at or above 25 ppb (single substance), 250 ppb (sum) or 50 ppm (total fluorine) from 12 August 2026.",
+    href: "/services/pfas-compliance",
+  },
+  {
+    article: "Art. 6",
+    headline: "Recyclability by design",
+    summary:
+      "All packaging graded Class A, B or C from 1 January 2030. From 1 January 2038, only A and B remain on the EU market.",
+    href: "/services/recyclability-assessment",
+  },
+  {
+    article: "Art. 7",
+    headline: "Recycled content in plastics",
+    summary:
+      "30% / 10% / 30% / 35% recycled content thresholds from 2030, rising to 50% / 25% / 65% / 65% from 2040.",
+    href: "/services/recycled-content-roadmap",
+  },
+  {
+    article: "Art. 24",
+    headline: "Empty space ratio",
+    summary:
+      "Maximum 50% empty space in grouped, transport and e-commerce packaging from 12 August 2028.",
+    href: "/services/ppwr-gap-analysis",
+  },
+  {
+    article: "Art. 29",
+    headline: "Reuse and refill targets",
+    summary:
+      "40% transport-packaging reuse by 2030, 70% by 2040; 10% reusable beverage packaging by 2030, 40% by 2040.",
+    href: "/services/reuse-targets-strategy",
+  },
+  {
+    article: "Art. 39",
+    headline: "Declaration of Conformity",
+    summary:
+      "DoC drawn up before placing on market; technical documentation kept for 10 years and produced on surveillance request.",
+    href: "/services/declaration-of-conformity",
+  },
+];
+
+export function RegulationAtAGlance() {
+  return (
+    <section
+      aria-labelledby="regulation-title"
+      className="bg-white py-20 md:py-28"
+    >
+      <div className="mx-auto max-w-[1280px] px-6">
+        <div className="mx-auto max-w-3xl text-center">
+          <span
+            className="inline-block rounded-full bg-[#d1fae5] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#065f46]"
+            style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+          >
+            The regulation at a glance
+          </span>
+          <h2
+            id="regulation-title"
+            className="mt-4 text-3xl font-bold leading-tight text-foreground md:text-5xl"
+            style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+          >
+            Six obligations that rewrite EU packaging
+          </h2>
+          <p
+            className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg"
+            style={{ fontFamily: "var(--font-maison-neue)" }}
+          >
+            Regulation (EU) 2025/40 replaces Directive 94/62/EC and binds every economic
+            operator placing packaging on the EU market. Below — the six articles that
+            drive 90% of compliance work between now and 2030.
+          </p>
+        </div>
+
+        <div className="mt-14 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {OBLIGATIONS.map((o) => (
+            <article
+              key={o.article}
+              className="group flex flex-col rounded-3xl border border-border bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-[#10b981]/40 hover:shadow-lg"
+            >
+              <span
+                className="inline-flex w-fit items-center rounded-lg bg-[#0f1a16] px-2.5 py-1 text-[11px] font-bold tracking-wide text-[#10b981]"
+                style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+              >
+                {o.article}
+              </span>
+              <h3
+                className="mt-4 text-xl font-bold leading-snug text-foreground"
+                style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+              >
+                {o.headline}
+              </h3>
+              <p
+                className="mt-3 flex-1 text-[15px] leading-relaxed text-muted-foreground"
+                style={{ fontFamily: "var(--font-maison-neue)" }}
+              >
+                {o.summary}
+              </p>
+              <Link
+                href={o.href}
+                className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-[#10b981] transition-all group-hover:gap-2.5"
+                style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+              >
+                Read more
+                <ArrowRight size={14} />
+              </Link>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
