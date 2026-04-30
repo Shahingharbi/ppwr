@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import localFont from "next/font/local";
 
 import "./globals.css";
 
-import { Footer } from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
-import { TopBanner } from "@/components/TopBanner";
-import { StickyMobileCTA } from "@/components/shared/StickyMobileCTA";
+import { LOCALE_HTML_LANG, resolveLocale } from "@/lib/i18n/types";
 import { siteConfig } from "@/lib/site-config";
 
 const gintoNord = localFont({
@@ -33,13 +31,16 @@ const maisonNeue = localFont({
   display: "swap",
 });
 
+const DEFAULT_TITLE = "Pactum — The PPWR Advisory";
+const DEFAULT_DESCRIPTION = siteConfig.description.en;
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "Pactum — The PPWR Advisory",
+    default: DEFAULT_TITLE,
     template: "%s | Pactum",
   },
-  description: siteConfig.description,
+  description: DEFAULT_DESCRIPTION,
   applicationName: siteConfig.name,
   authors: [{ name: siteConfig.legalName, url: siteConfig.url }],
   keywords: [
@@ -56,27 +57,33 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: "/",
+    languages: {
+      fr: "/fr",
+      en: "/en",
+      "x-default": "/fr",
+    },
   },
   openGraph: {
     type: "website",
-    siteName: siteConfig.name,
-    locale: "en_EU",
+    siteName: "Pactum",
+    locale: "en_GB",
+    alternateLocale: ["fr_FR"],
     url: siteConfig.url,
-    title: "Pactum — The PPWR Advisory",
-    description: siteConfig.description,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: "Pactum — The PPWR Advisory",
+        alt: DEFAULT_TITLE,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pactum — The PPWR Advisory",
-    description: siteConfig.description,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     images: [siteConfig.ogImage],
     creator: "@pactumadvisory",
     site: "@pactumadvisory",
@@ -100,11 +107,12 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${siteConfig.url}#organization`,
   name: siteConfig.legalName,
   alternateName: siteConfig.name,
   url: siteConfig.url,
   logo: `${siteConfig.url}/images/seo/logo.png`,
-  description: siteConfig.description,
+  description: DEFAULT_DESCRIPTION,
   email: siteConfig.contactEmail,
   foundingDate: String(siteConfig.foundedYear),
   areaServed: {
@@ -122,16 +130,19 @@ const organizationJsonLd = {
     "Declaration of Conformity",
   ],
   sameAs: [siteConfig.social.linkedin, siteConfig.social.x],
-};
+} as const;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const locale = resolveLocale(headerList.get("x-locale"));
+
   return (
     <html
-      lang="en"
+      lang={LOCALE_HTML_LANG[locale]}
       className={`${gintoNord.variable} ${maisonNeueExtended.variable} ${maisonNeue.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-body text-foreground bg-background">
@@ -140,11 +151,7 @@ export default function RootLayout({
           // eslint-disable-next-line react/no-danger -- JSON-LD is a static, trusted payload
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        <TopBanner />
-        <Navbar />
-        <main className="flex-1 flex flex-col">{children}</main>
-        <Footer />
-        <StickyMobileCTA />
+        {children}
       </body>
     </html>
   );

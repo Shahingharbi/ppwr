@@ -1,16 +1,27 @@
 import { ChevronRight } from "lucide-react";
+import type { Locale } from "@/lib/i18n/types";
 
 type Crumb = { label: string; href?: string };
 
 type Props = {
   items: Crumb[];
+  locale?: Locale;
+};
+
+const ARIA_LABEL: Record<Locale, string> = {
+  fr: "Fil d'Ariane",
+  en: "Breadcrumb",
 };
 
 /**
  * Visual breadcrumb plus inline BreadcrumbList JSON-LD.
  * The trailing item is the current page (no href).
+ *
+ * `items[].href` should already be locale-prefixed by the caller (e.g.
+ * `/fr/services/...`). The JSON-LD `item` URL is built absolute against
+ * the canonical site URL.
  */
-export function Breadcrumb({ items }: Props) {
+export function Breadcrumb({ items, locale = "en" }: Props) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -26,7 +37,7 @@ export function Breadcrumb({ items }: Props) {
 
   return (
     <nav
-      aria-label="Breadcrumb"
+      aria-label={ARIA_LABEL[locale]}
       className="mx-auto max-w-[1280px] px-6 pt-6"
       style={{ fontFamily: "var(--font-maison-neue)" }}
     >

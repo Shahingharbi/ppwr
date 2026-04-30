@@ -68,8 +68,8 @@ const blogJsonLd = {
   },
   blogPost: posts.map((p) => ({
     "@type": "BlogPosting",
-    headline: p.title,
-    description: p.excerpt,
+    headline: p.title.en,
+    description: p.excerpt.en,
     datePublished: p.publishedAt,
     dateModified: p.updatedAt ?? p.publishedAt,
     url: `${siteConfig.url}/blog/${p.slug}`,
@@ -174,7 +174,7 @@ export default function BlogIndex() {
                 {post.hero ? (
                   <Image
                     src={post.hero.src}
-                    alt={post.hero.alt}
+                    alt={post.hero.alt.en}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -204,7 +204,7 @@ export default function BlogIndex() {
                 >
                   <span className="inline-flex items-center gap-1.5">
                     <Clock size={12} />
-                    {post.readTime}
+                    {post.readTime.en}
                   </span>
                   <span aria-hidden>·</span>
                   <time dateTime={post.publishedAt}>
@@ -215,13 +215,13 @@ export default function BlogIndex() {
                   className="mt-3 text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-[#10b981]"
                   style={{ fontFamily: "var(--font-maison-neue-extended)" }}
                 >
-                  {post.title}
+                  {post.title.en}
                 </h2>
                 <p
                   className="mt-3 text-sm leading-relaxed text-muted-foreground line-clamp-3"
                   style={{ fontFamily: "var(--font-maison-neue)" }}
                 >
-                  {post.excerpt}
+                  {post.excerpt.en}
                 </p>
                 <div className="mt-auto pt-5">
                   <div
@@ -229,7 +229,7 @@ export default function BlogIndex() {
                     style={{ fontFamily: "var(--font-maison-neue)" }}
                   >
                     <span className="text-muted-foreground">
-                      {post.author.name} · {post.author.role}
+                      {post.author.name} · {post.author.role.en}
                     </span>
                     <span
                       className="inline-flex items-center gap-1.5 font-semibold text-[#10b981] transition-all group-hover:gap-2.5"

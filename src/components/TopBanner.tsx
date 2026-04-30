@@ -3,10 +3,19 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
+import type { Locale } from "@/lib/i18n/types";
+import { getDict } from "@/lib/i18n/dict";
+
 const STORAGE_KEY = "pactum-topbanner-dismissed";
 const PPWR_GENERAL_APPLICATION = new Date("2026-08-12T00:00:00Z");
 
-export function TopBanner() {
+type TopBannerProps = {
+  /** REQUIRED — the chrome must always be invoked from a locale-aware layout. */
+  locale: Locale;
+};
+
+export function TopBanner({ locale }: TopBannerProps) {
+  const dict = getDict(locale);
   const [mounted, setMounted] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
@@ -37,7 +46,7 @@ export function TopBanner() {
 
   if (mounted && dismissed) return null;
 
-  const daysLabel = daysLeft === null ? "—" : `${daysLeft} days left`;
+  const daysLabel = daysLeft === null ? "—" : dict.topBanner.daysLeft(daysLeft);
 
   return (
     <div
@@ -51,14 +60,14 @@ export function TopBanner() {
             className="hidden sm:inline-flex items-center rounded-full border border-[#10b981]/40 bg-[#10b981]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#10b981]"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            Regulation (EU) 2025/40
+            {dict.topBanner.chip}
           </span>
           <p
             className="truncate text-[12px] sm:text-[13px] leading-none text-white/90"
             style={{ fontFamily: "var(--font-maison-neue)" }}
           >
-            <span className="font-semibold text-white">PPWR general application:</span>{" "}
-            <span className="hidden sm:inline">12 August 2026 — </span>
+            <span className="font-semibold text-white">{dict.topBanner.label}</span>{" "}
+            <span className="hidden sm:inline">{dict.topBanner.application} — </span>
             <span className="text-[#10b981] font-semibold">{daysLabel}</span>
           </p>
         </div>
@@ -66,7 +75,7 @@ export function TopBanner() {
           type="button"
           onClick={handleDismiss}
           className="flex-shrink-0 text-white/70 hover:text-white transition-colors"
-          aria-label="Dismiss banner"
+          aria-label={dict.topBanner.dismiss}
         >
           <X size={14} />
         </button>

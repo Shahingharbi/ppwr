@@ -2,7 +2,15 @@ import Link from "next/link";
 import { Mail } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
-import { resources, sectors, services, siteConfig } from "@/lib/site-config";
+import {
+  getResourcesNav,
+  getSectorsNav,
+  getServicesNav,
+  localizeHref,
+  siteConfig,
+} from "@/lib/site-config";
+import type { Locale } from "@/lib/i18n/types";
+import { getDict } from "@/lib/i18n/dict";
 
 function LinkedInIcon({ size = 15 }: { size?: number }) {
   return (
@@ -19,16 +27,26 @@ function LinkedInIcon({ size = 15 }: { size?: number }) {
   );
 }
 
-const insightsAndLegal = [
-  { href: "/blog", label: "Insights" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-  { href: "/imprint", label: "Imprint" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/cookie-policy", label: "Cookie policy" },
-];
+type FooterProps = {
+  /** REQUIRED — the chrome must always be invoked from a locale-aware layout. */
+  locale: Locale;
+};
 
-export function Footer() {
+export function Footer({ locale }: FooterProps) {
+  const dict = getDict(locale);
+  const services = getServicesNav(locale);
+  const sectors = getSectorsNav(locale);
+  const resources = getResourcesNav(locale);
+
+  const insightsAndLegal = [
+    { href: "/blog", label: dict.footer.insights },
+    { href: "/about", label: dict.footer.about },
+    { href: "/contact", label: dict.footer.contact },
+    { href: "/imprint", label: dict.footer.imprint },
+    { href: "/privacy", label: dict.footer.privacy },
+    { href: "/cookie-policy", label: dict.footer.cookies },
+  ];
+
   return (
     <footer className="bg-[#0f1a16] text-white pt-16 pb-8 mt-auto">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6">
@@ -36,23 +54,21 @@ export function Footer() {
         <div className="grid grid-cols-2 gap-10 lg:grid-cols-12 lg:gap-8">
           {/* Brand column */}
           <div className="col-span-2 lg:col-span-4">
-            <Link href="/" aria-label="Pactum — home" className="inline-flex">
+            <Link href={localizeHref("/", locale)} aria-label="Pactum — home" className="inline-flex">
               <Logo variant="light" compact />
             </Link>
             <p
               className="mt-5 text-[13.5px] leading-relaxed text-white/65 max-w-[34ch]"
               style={{ fontFamily: "var(--font-maison-neue)" }}
             >
-              Pactum is the EU advisory dedicated to Regulation (EU) 2025/40 — the Packaging and
-              Packaging Waste Regulation. We turn the Regulation into a costed, audit-ready
-              compliance roadmap for packaging-intensive companies.
+              {dict.footer.tagline}
             </p>
 
             <p
               className="mt-5 text-[11.5px] uppercase tracking-[0.18em] text-[#10b981]"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              The PPWR Advisory
+              {siteConfig.tagline[locale]}
             </p>
 
             <div className="mt-6 flex items-center gap-3">
@@ -76,36 +92,36 @@ export function Footer() {
           </div>
 
           {/* Services */}
-          <FooterCol title="Services" className="col-span-1 lg:col-span-3">
+          <FooterCol title={dict.footer.services} className="col-span-1 lg:col-span-3">
             {services.map((item) => (
-              <FooterLink key={item.href} href={item.href}>
+              <FooterLink key={item.href} href={localizeHref(item.href, locale)}>
                 {item.label}
               </FooterLink>
             ))}
           </FooterCol>
 
           {/* Sectors */}
-          <FooterCol title="Sectors" className="col-span-1 lg:col-span-2">
+          <FooterCol title={dict.footer.sectors} className="col-span-1 lg:col-span-2">
             {sectors.map((item) => (
-              <FooterLink key={item.href} href={item.href}>
+              <FooterLink key={item.href} href={localizeHref(item.href, locale)}>
                 {item.label}
               </FooterLink>
             ))}
           </FooterCol>
 
           {/* Resources */}
-          <FooterCol title="Resources" className="col-span-1 lg:col-span-2">
+          <FooterCol title={dict.footer.resources} className="col-span-1 lg:col-span-2">
             {resources.map((item) => (
-              <FooterLink key={item.href} href={item.href}>
+              <FooterLink key={item.href} href={localizeHref(item.href, locale)}>
                 {item.label}
               </FooterLink>
             ))}
           </FooterCol>
 
           {/* Insights / Legal */}
-          <FooterCol title="Company & legal" className="col-span-1 lg:col-span-1">
+          <FooterCol title={`${dict.footer.company} & ${dict.footer.legal}`} className="col-span-1 lg:col-span-1">
             {insightsAndLegal.map((item) => (
-              <FooterLink key={item.href} href={item.href}>
+              <FooterLink key={item.href} href={localizeHref(item.href, locale)}>
                 {item.label}
               </FooterLink>
             ))}
@@ -119,13 +135,13 @@ export function Footer() {
               className="text-[15px] font-semibold text-white"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              Quarterly regulatory briefing
+              {dict.footer.newsletter.title}
             </h3>
             <p
               className="mt-2 text-[13.5px] text-white/60 leading-relaxed"
               style={{ fontFamily: "var(--font-maison-neue)" }}
             >
-              Quarterly briefing. Regulatory updates only. No upsell.
+              {dict.footer.newsletter.description}
             </p>
           </div>
           <form
@@ -134,14 +150,14 @@ export function Footer() {
             aria-label="Newsletter signup"
           >
             <label htmlFor="footer-newsletter-email" className="sr-only">
-              Work email
+              {dict.footer.newsletter.placeholder}
             </label>
             <input
               id="footer-newsletter-email"
               type="email"
               required
               autoComplete="email"
-              placeholder="director.packaging@yourgroup.eu"
+              placeholder={dict.footer.newsletter.placeholder}
               className="flex-1 rounded-full bg-white/5 border border-white/15 px-5 py-3 text-[13.5px] text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#10b981]/60 focus:border-transparent transition"
               style={{ fontFamily: "var(--font-maison-neue)" }}
             />
@@ -150,7 +166,7 @@ export function Footer() {
               className="rounded-full bg-[#10b981] hover:bg-[#059669] px-6 py-3 text-[13px] font-semibold text-white transition-colors"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              Subscribe
+              {dict.footer.newsletter.submit}
             </button>
           </form>
         </div>
@@ -160,10 +176,7 @@ export function Footer() {
           className="mt-10 text-[11.5px] text-white/40 leading-relaxed max-w-[88ch]"
           style={{ fontFamily: "var(--font-maison-neue)" }}
         >
-          Pactum Advisory is an independent consulting firm. We are not affiliated with the
-          European Commission, the European Parliament, the Council of the European Union, or any
-          other EU institution. References to Regulation (EU) 2025/40 cite the official text
-          published in the Official Journal of the European Union (OJ L, 22 January 2025).
+          {dict.footer.independent}
         </p>
 
         {/* Bottom bar */}
@@ -172,7 +185,7 @@ export function Footer() {
             className="text-[11.5px] text-white/45"
             style={{ fontFamily: "var(--font-maison-neue)" }}
           >
-            &copy; 2025 Pactum Advisory. All rights reserved.
+            {dict.footer.copyright}
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-[11.5px] text-white/45">
             <span
@@ -180,11 +193,9 @@ export function Footer() {
               style={{ fontFamily: "var(--font-maison-neue)" }}
             >
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#10b981]" />
-              Made in EU
+              {dict.footer.madeInEu}
             </span>
-            <span style={{ fontFamily: "var(--font-maison-neue)" }}>
-              Regulation (EU) 2025/40 — your roadmap, our craft
-            </span>
+            <span style={{ fontFamily: "var(--font-maison-neue)" }}>{dict.footer.motto}</span>
           </div>
         </div>
       </div>
