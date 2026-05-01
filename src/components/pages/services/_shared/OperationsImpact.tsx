@@ -1,4 +1,5 @@
 import { Settings2 } from "lucide-react";
+import type { Locale } from "@/lib/i18n/types";
 
 type Item = {
   title: string;
@@ -8,15 +9,29 @@ type Item = {
 type Props = {
   title?: string;
   items: Item[];
+  locale?: Locale;
+};
+
+const COPY: Record<Locale, { title: string; eyebrow: string }> = {
+  en: {
+    title: "What changes for your operations",
+    eyebrow: "Operational impact",
+  },
+  fr: {
+    title: "Ce qui change pour vos opérations",
+    eyebrow: "Impact opérationnel",
+  },
 };
 
 /**
  * "What changes for your operations" — 5–7 specific bullet impacts.
  */
 export function OperationsImpact({
-  title = "What changes for your operations",
+  title,
   items,
+  locale = "en",
 }: Props) {
+  const t = COPY[locale];
   return (
     <section className="bg-[#f5f7f4] py-16 md:py-24">
       <div className="mx-auto max-w-[1080px] px-6">
@@ -26,13 +41,13 @@ export function OperationsImpact({
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
             <Settings2 size={12} />
-            Operational impact
+            {t.eyebrow}
           </span>
           <h2
             className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            {title}
+            {title ?? t.title}
           </h2>
         </div>
 

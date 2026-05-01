@@ -1,5 +1,6 @@
 import { Package, Clock, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { Locale } from "@/lib/i18n/types";
 
 export type Deliverable = {
   icon?: LucideIcon;
@@ -13,6 +14,33 @@ type Props = {
   deliverables: Deliverable[];
   timeToDeliver: string;
   teamComposition: string;
+  locale?: Locale;
+};
+
+const COPY: Record<
+  Locale,
+  {
+    title: string;
+    eyebrow: string;
+    deliverable: string;
+    timeToDeliver: string;
+    teamComposition: string;
+  }
+> = {
+  en: {
+    title: "What you get",
+    eyebrow: "Deliverables",
+    deliverable: "Deliverable",
+    timeToDeliver: "Time to deliver",
+    teamComposition: "Team composition",
+  },
+  fr: {
+    title: "Ce que vous recevez",
+    eyebrow: "Livrables",
+    deliverable: "Livrable",
+    timeToDeliver: "Délai de livraison",
+    teamComposition: "Équipe mobilisée",
+  },
 };
 
 /**
@@ -20,12 +48,14 @@ type Props = {
  * suggested time-to-deliver and team composition.
  */
 export function DeliverablesGrid({
-  title = "What you get",
+  title,
   description,
   deliverables,
   timeToDeliver,
   teamComposition,
+  locale = "en",
 }: Props) {
+  const t = COPY[locale];
   return (
     <section className="bg-white py-16 md:py-24">
       <div className="mx-auto max-w-[1200px] px-6">
@@ -35,13 +65,13 @@ export function DeliverablesGrid({
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
             <Package size={12} />
-            Deliverables
+            {t.eyebrow}
           </span>
           <h2
             className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            {title}
+            {title ?? t.title}
           </h2>
           {description && (
             <p
@@ -68,7 +98,7 @@ export function DeliverablesGrid({
                   className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-[#10b981]"
                   style={{ fontFamily: "var(--font-maison-neue-extended)" }}
                 >
-                  {String(i + 1).padStart(2, "0")} · Deliverable
+                  {String(i + 1).padStart(2, "0")} · {t.deliverable}
                 </p>
                 <h3
                   className="mt-2 text-base font-semibold text-foreground"
@@ -97,7 +127,7 @@ export function DeliverablesGrid({
                 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#10b981]"
                 style={{ fontFamily: "var(--font-maison-neue-extended)" }}
               >
-                Time to deliver
+                {t.timeToDeliver}
               </p>
               <p
                 className="mt-1 text-base font-semibold"
@@ -116,7 +146,7 @@ export function DeliverablesGrid({
                 className="text-xs font-semibold uppercase tracking-[0.14em] text-[#10b981]"
                 style={{ fontFamily: "var(--font-maison-neue-extended)" }}
               >
-                Team composition
+                {t.teamComposition}
               </p>
               <p
                 className="mt-1 text-base font-semibold text-foreground"

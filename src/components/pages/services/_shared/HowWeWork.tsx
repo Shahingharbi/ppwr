@@ -1,4 +1,5 @@
 import { ArrowDown } from "lucide-react";
+import type { Locale } from "@/lib/i18n/types";
 
 export type WorkStep = {
   step: string;
@@ -10,12 +11,25 @@ export type WorkStep = {
 type Props = {
   title?: string;
   steps: WorkStep[];
+  locale?: Locale;
+};
+
+const COPY: Record<Locale, { title: string; eyebrow: string }> = {
+  en: {
+    title: "How we work",
+    eyebrow: "Methodology",
+  },
+  fr: {
+    title: "Notre méthode",
+    eyebrow: "Méthodologie",
+  },
 };
 
 /**
  * "How we work" — vertical 5-step custom timeline used across service pages.
  */
-export function HowWeWork({ title = "How we work", steps }: Props) {
+export function HowWeWork({ title, steps, locale = "en" }: Props) {
+  const t = COPY[locale];
   return (
     <section className="bg-gradient-to-b from-white to-[#f5f7f4] py-16 md:py-24">
       <div className="mx-auto max-w-[960px] px-6">
@@ -24,13 +38,13 @@ export function HowWeWork({ title = "How we work", steps }: Props) {
             className="inline-flex items-center gap-2 rounded-full bg-[#d1fae5] px-3 py-1 text-xs font-semibold text-[#065f46]"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            Methodology
+            {t.eyebrow}
           </span>
           <h2
             className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            {title}
+            {title ?? t.title}
           </h2>
         </div>
 

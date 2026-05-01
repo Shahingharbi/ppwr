@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import {
   TestTube,
   ShieldAlert,
@@ -19,35 +20,45 @@ import {
   buildServiceSchema,
   buildFaqSchema,
 } from "@/components/pages/services/_shared/JsonLd";
+import { isLocale, type Locale } from "@/lib/i18n/types";
+import { buildLocalizedMetadata } from "@/lib/seo";
 
-const SERVICE_NAME = "PFAS Compliance (Article 5)";
 const SERVICE_PATH = "/services/pfas-compliance";
-const SERVICE_URL = `https://pactum-advisory.eu${SERVICE_PATH}`;
+const SERVICE_URL_BASE = "https://pactum-advisory.eu";
 
-const META_DESCRIPTION =
-  "Phase out intentionally added PFAS in food-contact packaging before 12 August 2026. Test, substitute and document against the 25 ppb / 250 ppb / 50 ppm thresholds.";
+const SERVICE_NAME_EN = "PFAS Compliance (Article 5)";
+const SERVICE_NAME_FR = "Conformité PFAS (article 5)";
 
-export const metadata: Metadata = {
-  title:
-    "PFAS in food-contact packaging — out by 12 August 2026 | Pactum",
-  description: META_DESCRIPTION,
-  alternates: { canonical: SERVICE_PATH },
-  openGraph: {
-    title: "PFAS in food-contact packaging — out by 12 August 2026 | Pactum",
-    description: META_DESCRIPTION,
-    url: SERVICE_URL,
-    siteName: "Pactum",
-    locale: "en_GB",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "PFAS in food-contact packaging — out by 12 August 2026 | Pactum",
-    description: META_DESCRIPTION,
-  },
+const META_EN = {
+  title: "PFAS in food-contact packaging — out by 12 August 2026 | Pactum",
+  description:
+    "Phase out intentionally added PFAS in food-contact packaging before 12 August 2026. Test, substitute and document against the 25 ppb / 250 ppb / 50 ppm thresholds.",
 };
 
-const FAQ_ITEMS = [
+const META_FR = {
+  title:
+    "PFAS dans le contact alimentaire — sortir avant le 12 août 2026 | Pactum",
+  description:
+    "Sortir les PFAS intentionnels des emballages au contact alimentaire avant le 12 août 2026. Tester, substituer et documenter face aux seuils 25 ppb / 250 ppb / 50 ppm de l'article 5 du règlement PPWR.",
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  if (!isLocale(rawLocale)) return {};
+  const meta = rawLocale === "fr" ? META_FR : META_EN;
+  return buildLocalizedMetadata({
+    title: meta.title,
+    description: meta.description,
+    path: SERVICE_PATH,
+    locale: rawLocale,
+  });
+}
+
+const FAQ_ITEMS_EN = [
   {
     question: "What does Article 5 prohibit and from when?",
     answerText:
@@ -80,18 +91,81 @@ const FAQ_ITEMS = [
   },
 ];
 
-const FAQ_ITEMS_FOR_FAQ = FAQ_ITEMS.map((it) => ({
-  question: it.question,
-  answer: it.answerText,
-}));
+const FAQ_ITEMS_FR = [
+  {
+    question: "Que prohibe l'article 5 et à compter de quand ?",
+    answerText:
+      "L'article 5 du Règlement (UE) 2025/40, lu conjointement avec l'Annexe II, interdit la mise sur le marché des emballages au contact alimentaire contenant des PFAS intentionnellement ajoutés à des concentrations supérieures aux seuils de l'Annexe à compter du 12 août 2026. L'interdiction s'applique à l'unité d'emballage et à chacun de ses composants, quel que soit le matériau. Les stocks mis sur le marché avant le 12 août 2026 peuvent continuer à circuler dans la chaîne d'approvisionnement au titre des mesures transitoires, mais ne peuvent être ré-étiquetés ou ré-emballés pour une nouvelle mise sur le marché.",
+  },
+  {
+    question: "Quels sont les trois seuils ?",
+    answerText:
+      "Les seuils de l'Annexe II sont : 25 ppb pour toute substance PFAS individuelle mesurée par analyse ciblée, 250 ppb pour la somme des PFAS mesurée par analyse ciblée (en tenant compte de la dégradation) et 50 ppm de fluor total comme indicateur. Un fluor supérieur à 50 ppm est traité comme une présomption d'ajout intentionnel de PFAS ; l'opérateur doit alors démontrer par analyse ciblée que les seuils individuel et somme ne sont pas dépassés.",
+  },
+  {
+    question: "Quels emballages sont concernés ?",
+    answerText:
+      "Les emballages au contact alimentaire — emballage primaire en contact direct ou indirect avec l'aliment, y compris les papiers et cartons à revêtements anti-graisse, les barquettes en fibres moulées, les films, les barquettes, les opercules et les vernis intérieurs des boîtes métalliques. L'article 5 atteint le niveau composant : une barquette avec un revêtement anti-graisse fluoré est non conforme même si l'unité assemblée est globalement conforme. Les emballages hors contact alimentaire ne sont pas dans le périmètre de l'article 5 — mais les PFAS peuvent rester soumis à REACH ou aux restrictions POP.",
+  },
+  {
+    question: "Qu'est-ce que l'analyse ciblée par rapport au fluor total ?",
+    answerText:
+      "L'analyse ciblée est la détermination chromatographique (LC-MS/MS, GC-MS) de substances PFAS nommément identifiées face aux seuils 25 ppb individuel et 250 ppb somme. Le fluor total est une méthode élémentaire (combustion-chromatographie ionique, EOF) qui capte tout le fluor organique comme un chiffre unique, utilisée comme indicateur de criblage face au seuil de 50 ppm. Le calibrage du règlement est ciblage-first ; le fluor total est le filet de sécurité pour les chimies PFAS non ciblées.",
+  },
+  {
+    question: "Comment sécuriser la chaîne d'approvisionnement ?",
+    answerText:
+      "Trois étapes. D'abord, les déclarations fournisseurs : une attestation écrite, citant les considérants et spécifique au composant, qu'aucun PFAS n'est intentionnellement ajouté. Ensuite, des clauses contractuelles dans le contrat-cadre d'achat faisant de toute non-conformité à l'article 5 un manquement avec indemnisation, prise en charge des coûts de rappel et obligations de garantie. Enfin, un plan de prélèvement et de test : échantillons représentatifs par fournisseur et par trimestre, résultats versés au dossier technique de l'article 39 pendant dix ans.",
+  },
+  {
+    question: "Quels sont les matériaux de substitution ?",
+    answerText:
+      "Pour la résistance aux graisses : revêtements à base de silicone, encollage AKD (dimère cétène alkylique), densification fibre et films complexés à base de polyoléfines ou de PLA. Pour le démoulage ou l'anti-adhérence : silicone, films biopolymères, papier-carton non traité lorsque l'application le permet. Chaque substitut a ses arbitrages — aptitude à la machine, migration au contact alimentaire, recyclabilité au titre de l'article 6 et éligibilité au recyclat au titre de l'article 7. Nous testons chaque candidat face à votre application.",
+  },
+];
 
-export default function PfasCompliancePage() {
+const COMPARISON_HEADERS = {
+  en: {
+    eyebrow: "How we compare",
+    title: "Pactum vs. Big-4 vs. sustainability consultancies",
+    intro:
+      "The PFAS programme is a regulatory and supply-chain problem with chemistry inside it. The advisor must read targeted analysis, substitute migration and supplier risk in the same brief.",
+    big4: "Typical Big-4",
+    sustainability: "Sustainability consultancy",
+    caption: "Engagement dimension",
+  },
+  fr: {
+    eyebrow: "Comparatif",
+    title: "Pactum face aux Big-4 et aux cabinets RSE",
+    intro:
+      "Le programme PFAS est un problème réglementaire et de chaîne d'approvisionnement avec de la chimie à l'intérieur. Le conseil doit lire analyse ciblée, migration des substituts et risque fournisseur dans le même brief.",
+    big4: "Big-4 typique",
+    sustainability: "Cabinet RSE",
+    caption: "Dimension de mission",
+  },
+} as const;
+
+const CONTINUE_READING = {
+  en: "Continue reading:",
+  fr: "Pour aller plus loin :",
+};
+
+function EnglishVersion({ locale }: { locale: Locale }) {
+  const FAQ_ITEMS = FAQ_ITEMS_EN;
+  const FAQ_ITEMS_FOR_FAQ = FAQ_ITEMS.map((it) => ({
+    question: it.question,
+    answer: it.answerText,
+  }));
+  const SERVICE_URL = `${SERVICE_URL_BASE}/${locale}${SERVICE_PATH}`;
+  const h = COMPARISON_HEADERS.en;
+
   return (
     <>
       <Breadcrumb
+        locale={locale}
         items={[
-          { label: "Home", href: "/" },
-          { label: "Services", href: "/services/ppwr-gap-analysis" },
+          { label: "Home", href: `/${locale}` },
+          { label: "Services", href: `/${locale}/services/ppwr-gap-analysis` },
           { label: "PFAS compliance" },
         ]}
       />
@@ -100,14 +174,14 @@ export default function PfasCompliancePage() {
         eyebrow="ARTICLE 5 · SUBSTANCES OF CONCERN"
         title="PFAS in food-contact packaging — out by 12 August 2026."
         subtitle="Article 5 prohibits intentionally added PFAS in food-contact packaging above 25 ppb individual, 250 ppb sum, or 50 ppm total fluorine. Twelve months to test, substitute and document — we run the programme end to end."
-        primaryCTA={{ href: "/contact", label: "Book a working session" }}
+        primaryCTA={{ href: `/${locale}/contact`, label: "Book a working session" }}
         secondaryCTA={{
-          href: "/resources/ppwr-readiness-assessment",
+          href: `/${locale}/resources/ppwr-readiness-assessment`,
           label: "Free PPWR readiness check",
         }}
       />
 
-      <RegulationBlock title="What the regulation says">
+      <RegulationBlock locale={locale} title="What the regulation says">
         <p>
           Article 5 of Regulation (EU) 2025/40 prohibits the placing on the EU
           market of food-contact packaging containing per- and polyfluoroalkyl
@@ -160,6 +234,7 @@ export default function PfasCompliancePage() {
       </RegulationBlock>
 
       <OperationsImpact
+        locale={locale}
         title="What changes for your operations"
         items={[
           {
@@ -196,6 +271,7 @@ export default function PfasCompliancePage() {
       />
 
       <DeliverablesGrid
+        locale={locale}
         title="What you get"
         description="A defensible, audit-ready PFAS programme built around your food-contact portfolio. Test plan, substitution roadmap, supplier clauses, and the file your market-surveillance authority can request."
         deliverables={[
@@ -229,6 +305,7 @@ export default function PfasCompliancePage() {
       />
 
       <HowWeWork
+        locale={locale}
         title="How we work — five gates from exposure to file"
         steps={[
           {
@@ -276,30 +353,28 @@ export default function PfasCompliancePage() {
               className="inline-flex items-center gap-2 rounded-full bg-[#d1fae5] px-3 py-1 text-xs font-semibold text-[#065f46]"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              How we compare
+              {h.eyebrow}
             </span>
             <h2
               className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              Pactum vs. Big-4 vs. sustainability consultancies
+              {h.title}
             </h2>
             <p
               className="mt-4 text-base leading-relaxed text-muted-foreground"
               style={{ fontFamily: "var(--font-maison-neue)" }}
             >
-              The PFAS programme is a regulatory and supply-chain problem with
-              chemistry inside it. The advisor must read targeted analysis,
-              substitute migration and supplier risk in the same brief.
+              {h.intro}
             </p>
           </div>
 
           <div className="mt-10">
             <ComparisonTable
               usLabel="Pactum"
-              competitor1Label="Typical Big-4"
-              competitor2Label="Sustainability consultancy"
-              caption="Engagement dimension"
+              competitor1Label={h.big4}
+              competitor2Label={h.sustainability}
+              caption={h.caption}
               rows={[
                 {
                   criterion: "Pure-play PPWR specialism",
@@ -354,31 +429,31 @@ export default function PfasCompliancePage() {
             className="text-sm text-muted-foreground"
             style={{ fontFamily: "var(--font-maison-neue)" }}
           >
-            Continue reading:{" "}
+            {CONTINUE_READING.en}{" "}
             <a
               className="font-semibold text-foreground hover:text-[#10b981]"
-              href="/services/ppwr-gap-analysis"
+              href={`/${locale}/services/ppwr-gap-analysis`}
             >
               PPWR Gap Analysis
             </a>
             {" · "}
             <a
               className="font-semibold text-foreground hover:text-[#10b981]"
-              href="/services/declaration-of-conformity"
+              href={`/${locale}/services/declaration-of-conformity`}
             >
               Declaration of Conformity (Article 39)
             </a>
             {" · "}
             <a
               className="font-semibold text-foreground hover:text-[#10b981]"
-              href="/services/recyclability-assessment"
+              href={`/${locale}/services/recyclability-assessment`}
             >
               Recyclability assessment (Article 6)
             </a>
             {" · "}
             <a
               className="font-semibold text-foreground hover:text-[#10b981]"
-              href="/resources/ppwr-timeline"
+              href={`/${locale}/resources/ppwr-timeline`}
             >
               PPWR Timeline 2025–2040
             </a>
@@ -394,8 +469,8 @@ export default function PfasCompliancePage() {
 
       <JsonLd
         data={buildServiceSchema({
-          name: SERVICE_NAME,
-          description: META_DESCRIPTION,
+          name: SERVICE_NAME_EN,
+          description: META_EN.description,
           serviceType: "Article 5 PFAS compliance for PPWR",
           url: SERVICE_URL,
         })}
@@ -403,4 +478,347 @@ export default function PfasCompliancePage() {
       <JsonLd data={buildFaqSchema(FAQ_ITEMS)} />
     </>
   );
+}
+
+function FrenchVersion({ locale }: { locale: Locale }) {
+  const FAQ_ITEMS = FAQ_ITEMS_FR;
+  const FAQ_ITEMS_FOR_FAQ = FAQ_ITEMS.map((it) => ({
+    question: it.question,
+    answer: it.answerText,
+  }));
+  const SERVICE_URL = `${SERVICE_URL_BASE}/${locale}${SERVICE_PATH}`;
+  const h = COMPARISON_HEADERS.fr;
+
+  return (
+    <>
+      <Breadcrumb
+        locale={locale}
+        items={[
+          { label: "Accueil", href: `/${locale}` },
+          { label: "Services", href: `/${locale}/services/ppwr-gap-analysis` },
+          { label: "Conformité PFAS" },
+        ]}
+      />
+
+      <PageHero
+        eyebrow="ARTICLE 5 · SUBSTANCES PRÉOCCUPANTES"
+        title="PFAS dans le contact alimentaire — sortir avant le 12 août 2026."
+        subtitle="L'article 5 interdit les PFAS intentionnellement ajoutés dans les emballages au contact alimentaire au-delà de 25 ppb individuel, 250 ppb somme ou 50 ppm de fluor total. Douze mois pour tester, substituer et documenter — nous menons le programme de bout en bout."
+        primaryCTA={{ href: `/${locale}/contact`, label: "Réserver une session de travail" }}
+        secondaryCTA={{
+          href: `/${locale}/resources/ppwr-readiness-assessment`,
+          label: "Diagnostic PPWR gratuit",
+        }}
+      />
+
+      <RegulationBlock locale={locale}>
+        <p>
+          L&apos;article 5 du Règlement (UE) 2025/40 interdit la mise sur le
+          marché européen d&apos;emballages au contact alimentaire contenant
+          des substances per- et polyfluoroalkylées (PFAS) intentionnellement
+          ajoutées à des concentrations supérieures aux seuils de
+          l&apos;Annexe II à compter du <strong>12 août 2026</strong>. Les
+          PFAS sont définis aux fins du règlement par renvoi à la définition
+          OCDE adoptée par la Commission — toute substance contenant au moins
+          un atome de carbone méthyle (CF₃-) ou méthylène (-CF₂-) entièrement
+          fluoré, avec les exclusions limitées listées en annexe.
+        </p>
+        <p>Les trois seuils sont :</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>
+            <strong>25 ppb</strong> pour toute substance PFAS individuelle
+            mesurée par <em>analyse ciblée</em> sur l&apos;emballage ou le
+            composant ;
+          </li>
+          <li>
+            <strong>250 ppb</strong> pour la somme des PFAS mesurée par
+            analyse ciblée, dégradation prise en compte ;
+          </li>
+          <li>
+            <strong>50 ppm</strong> de fluor total comme test indicateur de
+            criblage ; au-delà, l&apos;opérateur doit démontrer par analyse
+            ciblée que les seuils individuel et somme ne sont pas dépassés.
+          </li>
+        </ul>
+        <p>
+          L&apos;interdiction s&apos;applique à l&apos;unité d&apos;emballage
+          et à chacun de ses composants, quel que soit le matériau. Une
+          barquette papier enduite, une boîte métallique avec vernis fluoré,
+          un film plastique avec additif fluoré et une barquette en fibres
+          moulées avec traitement anti-graisse sont tous concernés.
+          L&apos;obligation de l&apos;article 5 s&apos;ancre sur
+          l&apos;opérateur économique obligé qui met l&apos;emballage sur le
+          marché européen — fabricant, importateur ou mandataire — et se
+          répercute sur l&apos;article 39, qui exige une Déclaration de
+          conformité écrite et la conservation pendant dix ans de la
+          documentation technique attestant la conformité.
+        </p>
+        <p>
+          La non-conformité est sanctionnée via le régime de surveillance du
+          marché du Règlement (UE) 2019/1020 (modifié par la PPWR) et les
+          sanctions de l&apos;article 68 que les États membres doivent fixer.
+          Les autorités peuvent exiger le dossier de tests, prélever des
+          échantillons, retirer les stocks et imposer des sanctions
+          financières. Les stocks mis sur le marché avant le 12 août 2026
+          peuvent continuer à circuler au titre des mesures transitoires,
+          mais ne peuvent être ré-étiquetés ou ré-emballés pour une nouvelle
+          mise sur le marché.
+        </p>
+      </RegulationBlock>
+
+      <OperationsImpact
+        locale={locale}
+        items={[
+          {
+            title: "Chaque SKU au contact alimentaire a besoin d'un dossier PFAS",
+            description:
+              "Les déclarations fournisseurs ne suffisent pas. L'article 39 exige des preuves de tests dans le dossier technique. L'analyse ciblée sur un échantillon représentatif par fournisseur et par type d'emballage est le standard minimum défendable.",
+          },
+          {
+            title: "Le criblage fluor total devient une routine",
+            description:
+              "L'EOF ou la combustion-IC pour le fluor organique total devient le criblage de première ligne en réception. Au-delà de 50 ppm, l'analyse ciblée prend le relais. La plupart des laboratoires proposent désormais le criblage à 120-220 € par échantillon.",
+          },
+          {
+            title: "Les emballages fibreux anti-graisse sont l'exposition principale",
+            description:
+              "Boîtes à pizza, barquettes restauration rapide, sachets pop-corn micro-ondes, moules de cuisson et papiers emballants en restauration rapide utilisent historiquement des revêtements fluorés. Les programmes de substitution doivent démarrer en 2025 pour être en linéaire à mi-2026.",
+          },
+          {
+            title: "Les contrats-cadres d'achat exigent des clauses PFAS dès aujourd'hui",
+            description:
+              "Les fournisseurs doivent garantir la conformité aux seuils de l'article 5, accepter les droits d'audit et de re-test et indemniser les coûts de rappel et de retrait. La clause s'ajoute à la garantie contact alimentaire existante (Règlement (CE) 1935/2004).",
+          },
+          {
+            title: "Les substituts nécessitent une validation multi-critères",
+            description:
+              "Silicone, encollage AKD, PLA, complexes polyoléfines et fibre densifiée non enduite ont chacun des arbitrages face à l'aptitude machine, la recyclabilité (article 6), l'éligibilité au recyclat (article 7) et les limites de migration (Règlement (UE) 10/2011 / 1935/2004).",
+          },
+          {
+            title: "L'exposition au rappel et au retrait est réelle",
+            description:
+              "Les lacunes documentaires de l'article 39 constituent en elles-mêmes un motif de retrait, et l'article 68 permet aux États membres d'imposer des sanctions dissuasives. La question pour le conseil d'administration est le coût de rappel et l'atteinte à la marque, et non le simple théâtre de la conformité.",
+          },
+        ]}
+      />
+
+      <DeliverablesGrid
+        locale={locale}
+        description="Un programme PFAS audit-ready et défendable, construit autour de votre portefeuille au contact alimentaire. Plan de tests, feuille de route de substitution, clauses fournisseurs et dossier que votre autorité de surveillance peut demander."
+        deliverables={[
+          {
+            icon: ShieldAlert,
+            title: "Registre d'exposition PFAS",
+            description:
+              "Chaque SKU au contact alimentaire rapproché de son risque PFAS au niveau composant : revêtements, encollages, films, vernis, agents de démoulage, additifs. Exposition fournisseur par fournisseur quantifiée et hiérarchisée.",
+          },
+          {
+            icon: TestTube,
+            title: "Plan de tests et partenariats laboratoire",
+            description:
+              "Protocole d'échantillonnage, plan de tests d'analyse ciblée (LC-MS/MS, GC-MS) et fluor total (EOF / CIC), short-list de laboratoires accrédités, calendrier de tests récurrents et chaîne de traçabilité pour le dossier de l'article 39.",
+          },
+          {
+            icon: ArrowLeftRight,
+            title: "Feuille de route de substitution",
+            description:
+              "Short-list de matériaux de substitution par application : silicone, AKD, densification fibre, complexes polyoléfines, films biopolymères. Tableau de notation multi-critères face aux articles 6 et 7 PPWR, à la migration au contact alimentaire et à l'aptitude machine.",
+          },
+          {
+            icon: FileSignature,
+            title: "Bibliothèque de clauses fournisseurs",
+            description:
+              "Clauses de contrat-cadre d'achat, modèle d'attestation fournisseur, droits d'audit et de re-test, libellés d'indemnisation. Alignées sur le Règlement (CE) 1935/2004 et le Règlement (UE) 10/2011 pour le plastique au contact alimentaire.",
+          },
+        ]}
+        timeToDeliver="4 à 6 semaines pour un portefeuille agroalimentaire typique"
+        teamComposition="1 associé, 1 spécialiste senior contact alimentaire, 1 lead achats"
+      />
+
+      <HowWeWork
+        locale={locale}
+        title="Notre méthode — cinq jalons, de l'exposition au dossier"
+        steps={[
+          {
+            step: "01",
+            title: "NDA, périmètre contact alimentaire et enregistrement SKU",
+            duration: "Semaine 0",
+            description:
+              "NDA mutuel. Nous enregistrons chaque SKU au contact alimentaire mis sur le marché européen, avec matière, fournisseur, pays et volume. Les articles hors contact alimentaire sont sortis du périmètre à ce stade.",
+          },
+          {
+            step: "02",
+            title: "Évaluation du risque au niveau composant",
+            duration: "Semaines 1-2",
+            description:
+              "Nous notons chaque composant pour le risque PFAS : revêtements fluorés, encollages, additifs, agents de démoulage, vernis. Les déclarations fournisseurs sont collectées et classées selon leur fiabilité — beaucoup ne sont pas suffisamment précises pour être défendables.",
+          },
+          {
+            step: "03",
+            title: "Exécution du plan de tests",
+            duration: "Semaines 2-4",
+            description:
+              "Le criblage fluor total est exécuté en premier comme test indicateur face au seuil de 50 ppm ; les criblages positifs déclenchent l'analyse ciblée face à 25 ppb individuel et 250 ppb somme. Les résultats sont consignés au format dossier technique.",
+          },
+          {
+            step: "04",
+            title: "Substitution et négociation fournisseurs",
+            duration: "Semaines 4-5",
+            description:
+              "Pour les SKU non conformes, nous établissons une short-list de substituts, menons une évaluation multi-critères et négocions avec les fournisseurs existants ou alternatifs. De nouvelles clauses contractuelles sont rédigées et signées avant essai de ligne.",
+          },
+          {
+            step: "05",
+            title: "Comité de pilotage et passation à l'article 39",
+            duration: "Semaines 5-6",
+            description:
+              "Nous remettons le registre d'exposition, le dossier de tests, la feuille de route de substitution et la bibliothèque de clauses. Nous briefons le comité de pilotage et intégrons le dossier dans votre processus de Déclaration de conformité.",
+          },
+        ]}
+      />
+
+      <section className="bg-white py-16 md:py-24">
+        <div className="mx-auto max-w-[1200px] px-6">
+          <div className="max-w-2xl">
+            <span
+              className="inline-flex items-center gap-2 rounded-full bg-[#d1fae5] px-3 py-1 text-xs font-semibold text-[#065f46]"
+              style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+            >
+              {h.eyebrow}
+            </span>
+            <h2
+              className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
+              style={{ fontFamily: "var(--font-maison-neue-extended)" }}
+            >
+              {h.title}
+            </h2>
+            <p
+              className="mt-4 text-base leading-relaxed text-muted-foreground"
+              style={{ fontFamily: "var(--font-maison-neue)" }}
+            >
+              {h.intro}
+            </p>
+          </div>
+
+          <div className="mt-10">
+            <ComparisonTable
+              usLabel="Pactum"
+              competitor1Label={h.big4}
+              competitor2Label={h.sustainability}
+              caption={h.caption}
+              rows={[
+                {
+                  criterion: "Spécialisation pure-player PPWR",
+                  us: { type: "yes", text: "Article 5 au quotidien" },
+                  competitor1: { type: "no", text: "Une offre dans un portefeuille RSE" },
+                  competitor2: { type: "no", text: "Généraliste économie circulaire" },
+                },
+                {
+                  criterion: "Veille réglementaire",
+                  us: { type: "yes", text: "REACH, POP et régimes contact alimentaire suivis chaque semaine" },
+                  competitor1: { type: "mixed", text: "Briefings trimestriels" },
+                  competitor2: { type: "no", text: "Au coup par coup" },
+                },
+                {
+                  criterion: "Délai au premier livrable",
+                  us: { type: "yes", text: "Programme en 4 à 6 semaines" },
+                  competitor1: { type: "no", text: "12 à 20 semaines" },
+                  competitor2: { type: "no", text: "8 à 14 semaines" },
+                },
+                {
+                  criterion: "Périmètre fixe, prix fixe",
+                  us: { type: "yes", text: "Devis avant kick-off" },
+                  competitor1: { type: "no", text: "Régie (T&M)" },
+                  competitor2: { type: "mixed", text: "Parfois" },
+                },
+                {
+                  criterion: "Engagement NDA en amont",
+                  us: { type: "yes", text: "Signé avant tout échange de données" },
+                  competitor1: { type: "mixed", text: "MSA standard" },
+                  competitor2: { type: "mixed", text: "MSA standard" },
+                },
+                {
+                  criterion: "Équipe couvrant l'UE",
+                  us: { type: "yes", text: "Analystes multi-juridictions en UE" },
+                  competitor1: { type: "yes", text: "Global, souvent piloté hors UE" },
+                  competitor2: { type: "mixed", text: "Pilotage mono-pays fréquent" },
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      <FAQ
+        title="Questions sur le programme PFAS (article 5)"
+        items={FAQ_ITEMS_FOR_FAQ}
+      />
+
+      <section className="bg-[#f5f7f4] py-12">
+        <div className="mx-auto max-w-[1080px] px-6">
+          <p
+            className="text-sm text-muted-foreground"
+            style={{ fontFamily: "var(--font-maison-neue)" }}
+          >
+            {CONTINUE_READING.fr}{" "}
+            <a
+              className="font-semibold text-foreground hover:text-[#10b981]"
+              href={`/${locale}/services/ppwr-gap-analysis`}
+            >
+              Analyse des écarts PPWR
+            </a>
+            {" · "}
+            <a
+              className="font-semibold text-foreground hover:text-[#10b981]"
+              href={`/${locale}/services/declaration-of-conformity`}
+            >
+              Déclaration de conformité (article 39)
+            </a>
+            {" · "}
+            <a
+              className="font-semibold text-foreground hover:text-[#10b981]"
+              href={`/${locale}/services/recyclability-assessment`}
+            >
+              Évaluation de recyclabilité (article 6)
+            </a>
+            {" · "}
+            <a
+              className="font-semibold text-foreground hover:text-[#10b981]"
+              href={`/${locale}/resources/ppwr-timeline`}
+            >
+              Calendrier PPWR 2025-2040
+            </a>
+            .
+          </p>
+        </div>
+      </section>
+
+      <ContactCTA
+        title="Soyez PFAS-clear avant le 12 août 2026"
+        description="Réservez une session de travail de 30 minutes. Nous confirmons le périmètre contact alimentaire, signons le NDA et démarrons le plan de tests dans la semaine."
+      />
+
+      <JsonLd
+        data={buildServiceSchema({
+          name: SERVICE_NAME_FR,
+          description: META_FR.description,
+          serviceType: "Conformité PFAS (article 5) PPWR",
+          url: SERVICE_URL,
+        })}
+      />
+      <JsonLd data={buildFaqSchema(FAQ_ITEMS)} />
+    </>
+  );
+}
+
+export default async function PfasCompliancePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale: rawLocale } = await params;
+  if (!isLocale(rawLocale)) notFound();
+  const locale = rawLocale;
+  if (locale === "fr") return <FrenchVersion locale={locale} />;
+  return <EnglishVersion locale={locale} />;
 }

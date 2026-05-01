@@ -1,26 +1,59 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { Mail, MessageSquare, Clock, MapPin, Building2 } from "lucide-react";
 import { Breadcrumb } from "@/components/pages/services/_shared/Breadcrumb";
 import { JsonLd } from "@/components/pages/services/_shared/JsonLd";
 import { ContactCTA } from "@/components/shared/ContactCTA";
 import { FAQ } from "@/components/shared/FAQ";
 import { ContactForm } from "@/components/pages/contact/ContactForm";
+import { isLocale, type Locale } from "@/lib/i18n/types";
+import { localizeHref } from "@/lib/site-config";
 
-export const metadata: Metadata = {
-  title: "Contact Pactum — book a PPWR working session",
-  description:
-    "Book a 30-minute PPWR working session with a Pactum advisor. EU-wide team, Brussels HQ, response within one business day. NDA on request.",
-  alternates: { canonical: "/contact" },
-  openGraph: {
-    title: "Contact Pactum — book a PPWR working session",
-    description:
-      "Book a 30-minute working session with a Pactum advisor on Regulation (EU) 2025/40.",
-    url: "https://pactum-advisory.eu/contact",
-    type: "website",
-  },
-};
+type PageProps = { params: Promise<{ locale: string }> };
 
-const NEXT_STEPS = [
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  if (!isLocale(rawLocale)) return {};
+  const locale: Locale = rawLocale;
+  const isFr = locale === "fr";
+
+  const title = isFr
+    ? "Contact Pactum — réserver une session de travail PPWR"
+    : "Contact Pactum — book a PPWR working session";
+  const description = isFr
+    ? "Réservez une session de travail PPWR de 30 minutes avec un consultant Pactum. Équipes UE, siège à Bruxelles, réponse sous un jour ouvré. NDA sur demande. règlement ppwr, PPWR France, ppwr emballage."
+    : "Book a 30-minute PPWR working session with a Pactum advisor. EU-wide team, Brussels HQ, response within one business day. NDA on request.";
+
+  return {
+    title,
+    description,
+    keywords: isFr
+      ? [
+          "contact ppwr",
+          "règlement ppwr",
+          "PPWR France",
+          "ppwr emballage",
+          "loi ppwr",
+          "cabinet conseil ppwr",
+          "diagnostic ppwr gratuit",
+        ]
+      : undefined,
+    alternates: {
+      canonical: `/${locale}/contact`,
+      languages: { fr: "/fr/contact", en: "/en/contact", "x-default": "/fr/contact" },
+    },
+    openGraph: {
+      title,
+      description: isFr
+        ? "Réservez une session de travail de 30 minutes avec un consultant Pactum sur le Règlement (UE) 2025/40."
+        : "Book a 30-minute working session with a Pactum advisor on Regulation (EU) 2025/40.",
+      url: `https://pactum-advisory.eu/${locale}/contact`,
+      type: "website",
+    },
+  };
+}
+
+const NEXT_STEPS_EN = [
   {
     n: "1",
     title: "Acknowledgement",
@@ -38,7 +71,25 @@ const NEXT_STEPS = [
   },
 ];
 
-const FAQS = [
+const NEXT_STEPS_FR = [
+  {
+    n: "1",
+    title: "Accusé de réception",
+    body: "Nous répondons sous un jour ouvré avec un modèle de NDA mutuel (ou signons le vôtre) et proposons trois créneaux.",
+  },
+  {
+    n: "2",
+    title: "Session de travail de 30 minutes",
+    body: "Nous cartographions votre périmètre emballages, les articles applicables et la forme réaliste d'une analyse des écarts en cinq jours.",
+  },
+  {
+    n: "3",
+    title: "Cahier des charges",
+    body: "Sous 48 heures, un SOW à périmètre fixe et prix fixe arrive dans votre boîte mail. Aucun théâtre achats.",
+  },
+];
+
+const FAQS_EN = [
   {
     question: "What does an engagement cost?",
     answer:
@@ -61,13 +112,103 @@ const FAQS = [
   },
 ];
 
-export default function ContactPage() {
+const FAQS_FR = [
+  {
+    question: "Combien coûte une mission ?",
+    answer:
+      "L'analyse des écarts PPWR en cinq jours est un produit à périmètre fixe et prix fixe. La tarification varie selon la taille du portefeuille (nombre de SKU, nombre de marchés UE) et nous partageons une fourchette indicative dès le premier appel. Les programmes de transformation plus larges sont en régie avec une enveloppe plafonnée.",
+  },
+  {
+    question: "Quelle est la durée d'une mission type ?",
+    answer:
+      "Le produit d'entrée standard fait cinq jours ouvrés du kick-off à la remise de la feuille de route. Les approfondissements article par article — notation de recyclabilité (article 6) ou sourcing de contenu recyclé (article 7) — durent deux à quatre semaines. Les retainers trimestriels couvrent la veille des actes délégués et d'exécution.",
+  },
+  {
+    question: "Signez-vous des NDA ?",
+    answer:
+      "Oui. Le NDA en amont est l'une de nos quatre valeurs opérationnelles. Nous travaillons sous accord de confidentialité mutuel dès le premier appel de 30 minutes. Nous pouvons signer votre modèle de NDA ou partager le nôtre ; l'un comme l'autre relève de la juridiction UE avec hébergement des données en zone UE.",
+  },
+  {
+    question: "Mission à distance ou sur site ?",
+    answer:
+      "La livraison par défaut est à distance, avec deux sessions de travail sur site sur demande — typiquement le kick-off et la restitution au comité de pilotage. Nous ne facturons pas les déplacements au sein de l'UE. Des semaines sur site sont disponibles pour les programmes de transformation.",
+  },
+];
+
+export default async function ContactPage({ params }: PageProps) {
+  const { locale: rawLocale } = await params;
+  if (!isLocale(rawLocale)) notFound();
+  const locale: Locale = rawLocale;
+  const isFr = locale === "fr";
+
+  const NEXT_STEPS = isFr ? NEXT_STEPS_FR : NEXT_STEPS_EN;
+  const FAQS = isFr ? FAQS_FR : FAQS_EN;
+
+  const t = isFr
+    ? {
+        crumbHome: "Accueil",
+        crumbContact: "Contact",
+        eyebrow: "Contact",
+        h1: "Réservez une session de travail.",
+        intro:
+          "Trente minutes avec un consultant Pactum. Nous cartographions votre périmètre emballages face au Règlement (UE) 2025/40, identifions les échéances contraignantes qui s'appliquent à vous et cadrons une feuille de route chiffrée.",
+        otherWaysTitle: "Autres moyens de nous joindre",
+        emailLabel: "E-mail",
+        linkedinLabel: "LinkedIn",
+        linkedinValue: "Pactum Advisory · Message direct",
+        responseLabel: "Délai de réponse",
+        responseValue: "Sous un jour ouvré, heure de Bruxelles.",
+        nextSteps: "Étapes suivantes",
+        salesNote:
+          "Nous n'avons pas d'équipe commerciale. La personne au téléphone est le consultant qui mènera la mission.",
+        whereChip: "Où nous sommes",
+        whereTitle: "Bruxelles · Équipes projet en France, Allemagne, Pays-Bas, Italie, Espagne",
+        hqTitle: "Pactum Advisory · Bruxelles",
+        hqBody:
+          "Avenue des Arts, 1000 Bruxelles, Belgique. À deux minutes de la Commission européenne et du Parlement européen — par construction.",
+        teamsTitle: "Équipes projet dans toute l'UE",
+        teamsBody:
+          "Allemagne, France, Pays-Bas, Italie et Espagne. Nous staffons chaque mission avec au moins un consultant travaillant dans la juridiction d'origine du client, afin que la transposition des articles 45, 50 et 68 par État membre soit couverte localement.",
+        readMethodology: "Lire la méthodologie du cabinet",
+        freeCheck: "Diagnostic gratuit",
+        faqTitle: "Questions fréquentes sur travailler avec Pactum",
+      }
+    : {
+        crumbHome: "Home",
+        crumbContact: "Contact",
+        eyebrow: "Contact",
+        h1: "Book a working session.",
+        intro:
+          "Thirty minutes with a Pactum advisor. We map your packaging perimeter against Regulation (EU) 2025/40, identify the binding deadlines that apply to you, and scope a costed roadmap.",
+        otherWaysTitle: "Other ways to reach us",
+        emailLabel: "Email",
+        linkedinLabel: "LinkedIn",
+        linkedinValue: "Pactum Advisory · DM the firm",
+        responseLabel: "Response time",
+        responseValue: "Within one business day, Brussels time.",
+        nextSteps: "What happens next",
+        salesNote:
+          "We do not have a sales team. The person on the call is the advisor who will work the engagement.",
+        whereChip: "Where we are",
+        whereTitle: "Brussels HQ. Project teams across the EU.",
+        hqTitle: "Pactum Advisory · Brussels",
+        hqBody:
+          "Avenue des Arts, 1000 Brussels, Belgium. Two minutes from the European Commission and the European Parliament — by design.",
+        teamsTitle: "Project teams across the EU",
+        teamsBody:
+          "Germany, France, Netherlands, Italy and Spain. We staff each engagement with at least one advisor working in the client's home jurisdiction so Member State transposition under Articles 45, 50 and 68 is covered locally.",
+        readMethodology: "Read the firm's methodology",
+        freeCheck: "Free readiness check",
+        faqTitle: "Frequently asked questions about working with Pactum",
+      };
+
   return (
     <>
       <Breadcrumb
+        locale={locale}
         items={[
-          { label: "Home", href: "/" },
-          { label: "Contact" },
+          { label: t.crumbHome, href: localizeHref("/", locale) },
+          { label: t.crumbContact },
         ]}
       />
 
@@ -78,21 +219,19 @@ export default function ContactPage() {
             className="inline-block rounded-full bg-[#d1fae5] px-3 py-1 text-xs font-semibold text-[#065f46]"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            Contact
+            {t.eyebrow}
           </span>
           <h1
             className="mt-5 text-4xl md:text-6xl font-bold text-foreground leading-[1.05] max-w-3xl"
             style={{ fontFamily: "var(--font-ginto-nord)" }}
           >
-            Book a working session.
+            {t.h1}
           </h1>
           <p
             className="mt-5 max-w-2xl text-lg text-muted-foreground leading-relaxed"
             style={{ fontFamily: "var(--font-maison-neue)" }}
           >
-            Thirty minutes with a Pactum advisor. We map your packaging perimeter against Regulation
-            (EU) 2025/40, identify the binding deadlines that apply to you, and scope a costed
-            roadmap.
+            {t.intro}
           </p>
         </div>
       </section>
@@ -101,7 +240,7 @@ export default function ContactPage() {
       <section className="bg-white py-12 md:py-16">
         <div className="mx-auto max-w-[1120px] px-6 grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-10">
           <div className="relative">
-            <ContactForm />
+            <ContactForm locale={locale} />
           </div>
 
           <aside className="space-y-6">
@@ -110,7 +249,7 @@ export default function ContactPage() {
                 className="text-xl font-bold text-foreground"
                 style={{ fontFamily: "var(--font-maison-neue-extended)" }}
               >
-                Other ways to reach us
+                {t.otherWaysTitle}
               </h2>
               <ul className="mt-5 space-y-4">
                 <li className="flex items-start gap-3">
@@ -122,7 +261,7 @@ export default function ContactPage() {
                       className="text-sm font-semibold text-foreground"
                       style={{ fontFamily: "var(--font-maison-neue-extended)" }}
                     >
-                      Email
+                      {t.emailLabel}
                     </p>
                     <a
                       href="mailto:advisory@pactum-advisory.eu"
@@ -141,7 +280,7 @@ export default function ContactPage() {
                       className="text-sm font-semibold text-foreground"
                       style={{ fontFamily: "var(--font-maison-neue-extended)" }}
                     >
-                      LinkedIn
+                      {t.linkedinLabel}
                     </p>
                     <a
                       href="https://www.linkedin.com/company/pactum-advisory"
@@ -149,7 +288,7 @@ export default function ContactPage() {
                       rel="noopener"
                       className="text-sm text-[#10b981] underline-offset-2 hover:underline"
                     >
-                      Pactum Advisory · DM the firm
+                      {t.linkedinValue}
                     </a>
                   </div>
                 </li>
@@ -162,11 +301,9 @@ export default function ContactPage() {
                       className="text-sm font-semibold text-foreground"
                       style={{ fontFamily: "var(--font-maison-neue-extended)" }}
                     >
-                      Response time
+                      {t.responseLabel}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      Within one business day, Brussels time.
-                    </p>
+                    <p className="text-sm text-muted-foreground">{t.responseValue}</p>
                   </div>
                 </li>
               </ul>
@@ -177,7 +314,7 @@ export default function ContactPage() {
                 className="text-xs font-bold uppercase tracking-[0.14em] text-[#10b981]"
                 style={{ fontFamily: "var(--font-maison-neue-extended)" }}
               >
-                What happens next
+                {t.nextSteps}
               </p>
               <ol className="mt-5 space-y-5">
                 {NEXT_STEPS.map((s) => (
@@ -211,8 +348,7 @@ export default function ContactPage() {
               className="rounded-2xl border border-dashed border-border bg-[#f5f7f4] p-4 text-sm text-muted-foreground"
               style={{ fontFamily: "var(--font-maison-neue)" }}
             >
-              We do not have a sales team. The person on the call is the advisor who will work the
-              engagement.
+              {t.salesNote}
             </p>
           </aside>
         </div>
@@ -225,13 +361,13 @@ export default function ContactPage() {
             className="inline-block rounded-full bg-white border border-border px-3 py-1 text-xs font-semibold text-[#10b981]"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            Where we are
+            {t.whereChip}
           </span>
           <h2
             className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            Brussels HQ. Project teams across the EU.
+            {t.whereTitle}
           </h2>
           <div className="mt-10 grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-6">
             <div className="rounded-3xl border border-border bg-white p-6 md:p-8">
@@ -242,14 +378,13 @@ export default function ContactPage() {
                 className="mt-5 text-lg font-bold text-foreground"
                 style={{ fontFamily: "var(--font-maison-neue-extended)" }}
               >
-                Pactum Advisory · Brussels
+                {t.hqTitle}
               </h3>
               <p
                 className="mt-2 text-sm text-muted-foreground leading-relaxed"
                 style={{ fontFamily: "var(--font-maison-neue)" }}
               >
-                Avenue des Arts, 1000 Brussels, Belgium. Two minutes from the European Commission and
-                the European Parliament — by design.
+                {t.hqBody}
               </p>
             </div>
             <div className="rounded-3xl border border-border bg-white p-6 md:p-8">
@@ -260,29 +395,27 @@ export default function ContactPage() {
                 className="mt-5 text-lg font-bold text-foreground"
                 style={{ fontFamily: "var(--font-maison-neue-extended)" }}
               >
-                Project teams across the EU
+                {t.teamsTitle}
               </h3>
               <p
                 className="mt-2 text-sm text-muted-foreground leading-relaxed"
                 style={{ fontFamily: "var(--font-maison-neue)" }}
               >
-                Germany, France, Netherlands, Italy and Spain. We staff each engagement with at least
-                one advisor working in the client&apos;s home jurisdiction so Member State transposition
-                under Articles 45, 50 and 68 is covered locally.
+                {t.teamsBody}
               </p>
               <p className="mt-4 text-sm">
                 <a
-                  href="/about"
+                  href={localizeHref("/about", locale)}
                   className="text-[#10b981] underline-offset-2 hover:underline"
                 >
-                  Read the firm&apos;s methodology
+                  {t.readMethodology}
                 </a>{" "}
                 ·{" "}
                 <a
-                  href="/resources/ppwr-readiness-assessment"
+                  href={localizeHref("/resources/ppwr-readiness-assessment", locale)}
                   className="text-[#10b981] underline-offset-2 hover:underline"
                 >
-                  Free readiness check
+                  {t.freeCheck}
                 </a>
               </p>
             </div>
@@ -291,10 +424,7 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ */}
-      <FAQ
-        items={FAQS}
-        title="Frequently asked questions about working with Pactum"
-      />
+      <FAQ items={FAQS} title={t.faqTitle} />
 
       <ContactCTA />
 
@@ -302,8 +432,9 @@ export default function ContactPage() {
         data={{
           "@context": "https://schema.org",
           "@type": "ContactPage",
-          name: "Contact Pactum",
-          url: "https://pactum-advisory.eu/contact",
+          name: isFr ? "Contacter Pactum" : "Contact Pactum",
+          url: `https://pactum-advisory.eu/${locale}/contact`,
+          inLanguage: isFr ? "fr-FR" : "en-GB",
           mainEntity: {
             "@type": "Organization",
             name: "Pactum",

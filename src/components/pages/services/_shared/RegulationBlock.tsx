@@ -1,4 +1,5 @@
 import { BookOpen, ExternalLink } from "lucide-react";
+import type { Locale } from "@/lib/i18n/types";
 
 type Props = {
   title?: string;
@@ -6,6 +7,20 @@ type Props = {
   children: React.ReactNode;
   /** Where to send the EUR-Lex outbound link. Defaults to the CELEX permanent ELI for Reg. (EU) 2025/40. */
   eurLexHref?: string;
+  locale?: Locale;
+};
+
+const COPY: Record<Locale, { title: string; eyebrow: string; readMore: string }> = {
+  en: {
+    title: "What the regulation says",
+    eyebrow: "Regulation (EU) 2025/40",
+    readMore: "Read the consolidated text on EUR-Lex",
+  },
+  fr: {
+    title: "Ce que dit le règlement",
+    eyebrow: "Règlement (UE) 2025/40",
+    readMore: "Lire le texte consolidé sur EUR-Lex",
+  },
 };
 
 /**
@@ -13,11 +28,13 @@ type Props = {
  * article references, and applicable dates.
  */
 export function RegulationBlock({
-  title = "What the regulation says",
-  eyebrow = "Regulation (EU) 2025/40",
+  title,
+  eyebrow,
   children,
   eurLexHref = "https://eur-lex.europa.eu/eli/reg/2025/40/oj",
+  locale = "en",
 }: Props) {
+  const t = COPY[locale];
   return (
     <section className="bg-white py-16 md:py-24">
       <div className="mx-auto max-w-[920px] px-6">
@@ -26,13 +43,13 @@ export function RegulationBlock({
           style={{ fontFamily: "var(--font-maison-neue-extended)" }}
         >
           <BookOpen size={12} />
-          {eyebrow}
+          {eyebrow ?? t.eyebrow}
         </span>
         <h2
           className="mt-4 text-3xl md:text-4xl font-bold text-foreground"
           style={{ fontFamily: "var(--font-maison-neue-extended)" }}
         >
-          {title}
+          {title ?? t.title}
         </h2>
 
         <div
@@ -49,7 +66,7 @@ export function RegulationBlock({
           className="mt-8 inline-flex items-center gap-2 rounded-full border border-border bg-[#f5f7f4] px-4 py-2 text-sm font-semibold text-foreground hover:border-[#10b981] hover:text-[#10b981] transition-colors"
           style={{ fontFamily: "var(--font-maison-neue-extended)" }}
         >
-          Read the consolidated text on EUR-Lex
+          {t.readMore}
           <ExternalLink size={14} />
         </a>
       </div>

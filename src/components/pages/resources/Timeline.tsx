@@ -1,4 +1,6 @@
 import { ArrowRight, CalendarDays } from "lucide-react";
+import type { Locale } from "@/lib/i18n/types";
+import { localizeHref } from "@/lib/site-config";
 
 export type TimelineMilestone = {
   date: string;
@@ -97,10 +99,103 @@ export const MILESTONES: TimelineMilestone[] = [
   },
 ];
 
-export function Timeline() {
+const MILESTONES_FR: TimelineMilestone[] = [
+  {
+    date: "22 janvier 2025",
+    year: 2025,
+    title: "Publication au Journal officiel",
+    article: "Règl. (UE) 2025/40",
+    body: "Le Règlement (UE) 2025/40 est publié au JO L. CELEX 32025R0040. Lire le texte publié — considérants compris — est la première étape de tout programme de conformité.",
+    link: { href: "/resources/ppwr-faq", label: "FAQ PPWR — bases" },
+  },
+  {
+    date: "11 février 2025",
+    year: 2025,
+    title: "Entrée en vigueur",
+    article: "Art. 79",
+    body: "Vingtième jour après la publication. Le Règlement devient un texte juridiquement contraignant ; le compte à rebours de dix-huit mois jusqu'à l'application générale commence ici. Les plans CAPEX 2026 doivent déjà citer le Règlement par numéro d'article.",
+    link: {
+      href: "/services/ppwr-gap-analysis",
+      label: "Analyse des écarts en 5 jours",
+    },
+  },
+  {
+    date: "12 août 2026",
+    year: 2026,
+    title: "Application générale — PFAS, interdictions usage unique et réemploi CHR",
+    article: "Art. 5, Art. 25, Annexe V, Art. 33",
+    body: "La plupart des dispositions deviennent applicables. Les emballages au contact alimentaire contenant des PFAS au-delà de 25 ppb (individuel), 250 ppb (somme) ou 50 ppm (fluor total) sont interdits. Les formats à usage unique de l'Annexe V sont prohibés (films pour fruits et légumes frais sous 1,5 kg, vaisselle CHR consommée sur place, mini-toiletries d'hôtel, sachets de condiments, sacs plastiques très légers). Les CHR doivent proposer une option réemployable pour la vente à emporter.",
+    link: {
+      href: "/services/pfas-compliance",
+      label: "Service conformité PFAS",
+    },
+  },
+  {
+    date: "12 août 2028",
+    year: 2028,
+    title: "Plafond du ratio d'espace vide et étiquetage harmonisé",
+    article: "Art. 24, Art. 12, Art. 13",
+    body: "Maximum 50 % d'espace vide dans les emballages groupés, de transport et e-commerce. Étiquettes harmonisées de composition matériau et de tri obligatoires sur chaque unité d'emballage. Code QR ou autre support de données numérique requis — déploiement du Passeport numérique de produit.",
+    link: {
+      href: "/services/declaration-of-conformity",
+      label: "Service DoC et étiquetage",
+    },
+  },
+  {
+    date: "31 décembre 2029",
+    year: 2029,
+    title: "Objectif DRS 90 % de collecte séparée",
+    article: "Art. 50",
+    body: "Les États membres doivent atteindre 90 % de collecte séparée des bouteilles plastiques de boisson à usage unique jusqu'à 3 L et des canettes métalliques. La consigne (DRS) devient obligatoire à moins d'avoir atteint 80 % au 31 décembre 2026 avec un plan crédible pour atteindre 90 %.",
+    link: {
+      href: "/sectors/fmcg",
+      label: "Secteur grande consommation & boissons",
+    },
+  },
+  {
+    date: "1er janvier 2030",
+    year: 2030,
+    title: "Seuil de recyclabilité A/B/C, contenu recyclé, réemploi et rechargement",
+    article: "Art. 6, Art. 7, Art. 29, Art. 30",
+    body: "Chaque unité d'emballage doit atteindre au minimum la classe C de recyclabilité. Les objectifs de contenu recyclé s'appliquent aux emballages plastiques : 30 % PET en contact sensible, 10 % autres plastiques en contact sensible, 30 % bouteilles de boisson, 35 % autres plastiques. Premiers objectifs de réemploi : 40 % transport et groupés, 10 % boissons. Stations de recharge obligatoires chez les détaillants avec surface ≥ 400 m².",
+    link: {
+      href: "/services/recycled-content-roadmap",
+      label: "Feuille de route contenu recyclé",
+    },
+  },
+  {
+    date: "1er janvier 2038",
+    year: 2038,
+    title: "Interdiction des emballages classe C",
+    article: "Art. 6",
+    body: "À partir de cette date, seuls les emballages classe A (≥ 95 %) et classe B (≥ 80 %) peuvent être mis sur le marché européen. Les emballages classe C sont retirés. La fenêtre de huit ans entre 2030 et 2038 est le délai de refonte.",
+    link: {
+      href: "/services/recyclability-assessment",
+      label: "Évaluation de recyclabilité",
+    },
+  },
+  {
+    date: "1er janvier 2040",
+    year: 2040,
+    title: "Objectifs ambitieux — contenu recyclé et réemploi",
+    article: "Art. 7, Art. 29",
+    body: "Le contenu recyclé monte à 50 % (PET contact sensible), 25 % (autres plastiques contact sensible), 65 % (bouteilles de boisson) et 65 % (autres plastiques). Le réemploi atteint 70 % pour le transport et les groupés, 40 % pour les boissons. Le gros électroménager atteint 90 % de réemploi des emballages de transport à cet horizon.",
+    link: {
+      href: "/services/reuse-targets-strategy",
+      label: "Stratégie réemploi et rechargement",
+    },
+  },
+];
+
+export function getMilestones(locale: Locale): TimelineMilestone[] {
+  return locale === "fr" ? MILESTONES_FR : MILESTONES;
+}
+
+export function Timeline({ locale = "en" }: { locale?: Locale }) {
+  const items = getMilestones(locale);
   return (
     <ol className="relative border-l-2 border-[#10b981]/30 pl-8 md:pl-10 space-y-10">
-      {MILESTONES.map((m) => (
+      {items.map((m) => (
         <li key={m.date} className="relative">
           <span
             aria-hidden
@@ -134,7 +229,7 @@ export function Timeline() {
             {m.body}
           </p>
           <a
-            href={m.link.href}
+            href={localizeHref(m.link.href, locale)}
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#10b981] hover:text-[#059669]"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >

@@ -9,7 +9,8 @@ import {
   FileCheck,
   type LucideIcon,
 } from "lucide-react";
-import { services } from "@/lib/site-config";
+import { getServicesNav } from "@/lib/site-config";
+import type { Locale } from "@/lib/i18n/types";
 
 const ICONS: Record<string, LucideIcon> = {
   "/services/ppwr-gap-analysis": ClipboardList,
@@ -20,7 +21,36 @@ const ICONS: Record<string, LucideIcon> = {
   "/services/declaration-of-conformity": FileCheck,
 };
 
-export function ServicesGrid() {
+type ServicesCopy = {
+  chip: string;
+  title: string;
+  intro: string;
+  methodologyLink: string;
+  exploreLabel: string;
+};
+
+const COPY: Record<Locale, ServicesCopy> = {
+  fr: {
+    chip: "Services de conseil",
+    title: "Six services. Un règlement. Des livrables article par article.",
+    intro:
+      "Chaque mission est cadrée sur un article précis et une date d'application précise. Pas de retainer, pas de dérive en heures facturables — périmètre fixe, prix fixe.",
+    methodologyLink: "Notre méthodologie",
+    exploreLabel: "Explorer",
+  },
+  en: {
+    chip: "Advisory services",
+    title: "Six services. One regulation. Article-precise deliverables.",
+    intro:
+      "Every engagement is scoped to a specific article and a specific applicability date. No retainers, no billable-hour drift — fixed scope, fixed price.",
+    methodologyLink: "Our methodology",
+    exploreLabel: "Explore",
+  },
+};
+
+export function ServicesGrid({ locale }: { locale: Locale }) {
+  const copy = COPY[locale];
+  const services = getServicesNav(locale);
   return (
     <section
       id="services"
@@ -34,29 +64,28 @@ export function ServicesGrid() {
               className="inline-block rounded-full border border-border bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[#10b981]"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              Advisory services
+              {copy.chip}
             </span>
             <h2
               id="services-title"
               className="mt-4 text-3xl font-bold leading-tight text-foreground md:text-5xl"
               style={{ fontFamily: "var(--font-maison-neue-extended)" }}
             >
-              Six services. One regulation. Article-precise deliverables.
+              {copy.title}
             </h2>
             <p
               className="mt-5 text-base leading-relaxed text-muted-foreground md:text-lg"
               style={{ fontFamily: "var(--font-maison-neue)" }}
             >
-              Every engagement is scoped to a specific article and a specific applicability
-              date. No retainers, no billable-hour drift — fixed scope, fixed price.
+              {copy.intro}
             </p>
           </div>
           <Link
-            href="/about"
+            href={`/${locale}/about`}
             className="inline-flex items-center gap-1.5 text-sm font-bold text-[#10b981] transition-all hover:gap-2.5"
             style={{ fontFamily: "var(--font-maison-neue-extended)" }}
           >
-            Our methodology
+            {copy.methodologyLink}
             <ArrowRight size={14} />
           </Link>
         </div>
@@ -67,7 +96,7 @@ export function ServicesGrid() {
             return (
               <Link
                 key={s.href}
-                href={s.href}
+                href={`/${locale}${s.href}`}
                 className="group flex h-[240px] flex-col justify-between rounded-3xl border border-border bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-[#10b981]/40 hover:shadow-lg"
               >
                 <div>
@@ -91,7 +120,7 @@ export function ServicesGrid() {
                   className="inline-flex items-center gap-1.5 text-sm font-bold text-[#10b981] transition-all group-hover:gap-2.5"
                   style={{ fontFamily: "var(--font-maison-neue-extended)" }}
                 >
-                  Explore
+                  {copy.exploreLabel}
                   <ArrowRight size={14} />
                 </span>
               </Link>
